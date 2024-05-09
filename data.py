@@ -17,10 +17,11 @@ from sklearn.model_selection import train_test_split
 
 
 class Data:
-
+    
     def data_clean(self,output_log=False):
         """資料清洗"""
-        df = pd.read_csv("./salary.csv")
+        df = pd.read_csv("./SourceData/salary.csv")
+        # df2 = pd.read_csv("")
 
         # print(df.isnull().sum())
         # print("資料無任一缺失值")
@@ -35,6 +36,11 @@ class Data:
         for column in df.select_dtypes(include='object').columns:
             print(f"\n{column}:")
             print(df[column].value_counts())
+        """
+        salary 正與負
+        <=50K    24720
+        >50K      7841
+        """
 
     def data_encoder(self):
         """資料預處理，含分割資料、資料轉換"""
@@ -61,6 +67,7 @@ class Data:
         print("縮放後的資料：")
         print(scaled_training_data)
         return scaled_training_data
+    
     def main(self):
         """執行"""
         print("1.資料清洗")
@@ -73,3 +80,7 @@ class Data:
         self.data_split()
         print("5.資料縮放")
         self.data_scaler()
+
+
+if __name__ == "__main__":
+    Data().data_intro()
