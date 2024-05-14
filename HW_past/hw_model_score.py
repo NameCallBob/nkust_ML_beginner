@@ -164,6 +164,36 @@ SVC_params= {
     'kernel': ['linear', 'rbf']
 }
 
+def smote(X,y):
+    """將資料比例調整平衡後進行訓練"""
+    from imblearn.over_sampling import SMOTE
+    # 初始化SMOTE
+    smote = SMOTE()
+    # 使用SMOTE進行過取樣
+    X_resampled, y_resampled = smote.fit_resample(X, y)
+    X_train, X_test, y_train, y_test = train_test_split(
+        X_resampled, y_resampled, test_size=0.2, random_state=42)
+    
+    model_1 = LogisticRegression(
+     max_iter=1000, solver='liblinear', random_state=42
+    )  
+
+    model_2 = SVC(
+        probability=True, random_state=42
+    )  
+    print("做五折訓練");print("-"*50);print("logistic")
+    model_training(X_train, X_test, y_train, y_test ,model_1)
+    print("-"*50);
+    model_training(X_train, X_test, y_train, y_test ,model_2)
+    print("-"*50);
+    
+    model_score(X,y,model_1)
+
+    model_score(X,y,model_2)
+    
+    
+
+     
 
 if __name__ == "__main__":
     df = Data().data_encoder()
@@ -183,12 +213,14 @@ if __name__ == "__main__":
     model_training(X_train, X_test, y_train, y_test ,model_2)
     print("-"*50);print("END")
 
+    
+
     # 第二題
     print("");print("2.利用RF之Factor important, 取重要性加總50%之重要性特徵");print("以下為結果")
 
     feature_column = feature(df,"salary")
     X = df[feature_column]
-
+    
     # 最後題
     print("logistic")
     model_score(X,y,model_1)
@@ -196,4 +228,5 @@ if __name__ == "__main__":
     model_score(X,y,model_2)
     print("-"*50);print("END")
     
-    # 我的模型結果跟我物聯網分數一樣：（
+    smote(X,y)
+

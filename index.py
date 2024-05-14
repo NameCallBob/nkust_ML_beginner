@@ -1,4 +1,6 @@
 from data import Data
+
+
 class HW:
     """呼叫以前的功課"""
     def __init__(self) -> None:
@@ -7,4 +9,5 @@ class HW:
 
     def decision(self):
         """決策樹"""
+        pass
         
