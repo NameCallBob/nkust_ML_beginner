@@ -68,6 +68,44 @@ class Data:
         print(scaled_training_data)
         return scaled_training_data
     
+    def Source_trainingdata(self,selected=False):
+        """原資料得訓練資料"""
+        self.df = self.data_encoder()
+        if selected:
+            X = self.df[['"age","workclass","education","occupation"']]
+        else:
+            X = self.df.drop(columns=['salary'])
+            
+        y = self.df["salary"]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42)
+
+        return X_train, X_test, y_train, y_test
+
+
+    def SMOTE_fitted_trainingdata(self,selected=False):
+        """
+        利用SMOTE取得相同比例的資料
+        @params selected -> 是否使用5折特徵
+        """
+        from imblearn.over_sampling import SMOTE
+        self.df = self.data_encoder()
+        # 分割特徵
+        if selected:
+            X = self.df[["age","workclass","education","occupation"]]
+        else:
+            X = self.df.drop(columns=['salary'])
+        y = self.df["salary"]
+        # SMOTE
+        smote = SMOTE()
+        X_resampled, y_resampled = smote.fit_resample(X, y)
+        # 訓練資料分割
+        X_train, X_test, y_train, y_test = train_test_split(
+        X_resampled, y_resampled, test_size=0.2, random_state=42)
+
+        return X_train, X_test, y_train, y_test
+    
     def main(self):
         """執行"""
         print("1.資料清洗")

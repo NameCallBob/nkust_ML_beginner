@@ -16,7 +16,7 @@ y = data['salary'].values  # 將目標變數轉換為數值陣列
 X_train, X_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42)
 
-svm_classifier = SVC(kernel='linear')
+svm_classifier = SVC()
 
 svm_classifier.fit(X_train, y_train)
 
