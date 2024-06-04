@@ -14,6 +14,7 @@ class model_l():
         y_pred = model.predict(X_test)
 
         self.__output_model_score("LinearRegression",y_test,y_pred)
+        self.__draw("LinearRegression",y_test,y_pred)
 
     def Elastic_net(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import ElasticNet
@@ -23,23 +24,49 @@ class model_l():
         y_pred = model.predict(X_test)
 
         self.__output_model_score("ElasticNet",y_test,y_pred)
+        self.__draw("ElasticNet",y_test,y_pred)
+    def RidgeRegressor(self,X_train, X_test, y_train, y_test):
+        from sklearn.linear_model import Ridge
+
+        # 建立Ridge模型並訓練
+        ridge_model = Ridge()
+        ridge_model.fit(X_train, y_train)
+
+        # 進行預測
+        y_pred = ridge_model.predict(X_test)
+        self.__output_model_score("Ridge",y_test,y_pred)
+        self.__draw("Ridge",y_test,y_pred)
+
+    def LassoRegressor(self,X_train, X_test, y_train, y_test):
+        from sklearn.linear_model import Lasso
+
+        # 建立LASSO模型並訓練
+        lasso_model = Lasso()
+        lasso_model.fit(X_train, y_train)
+
+        # 進行預測
+        y_pred = lasso_model.predict(X_test)
+        self.__output_model_score("Lasso",y_test,y_pred)
+        self.__draw("Lasso",y_test,y_pred)
 
     def Xgboost_Regressor(self,X_train, X_test, y_train, y_test):
         """
         Xgboost
-        """
+        """ 
         from xgboost import XGBRegressor
 
         model = XGBRegressor(objective='reg:squarederror', 
                     n_estimators=100, 
                     max_depth=3, 
-                    learning_rate=0.1, 
-                    random_state=42)
+                    learning_rate=0.1,
+                    random_state=42
+                )
         
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
         self.__output_model_score("XGBoostRegressor",y_test,y_pred)
+        self.__draw("XGboostRegessor",y_test,y_pred)
             
     def Adaboost_Regressor(self,X_train, X_test, y_train, y_test):
         from sklearn.ensemble import AdaBoostRegressor
@@ -56,6 +83,7 @@ class model_l():
         y_pred = model.predict(X_test)
 
         self.__output_model_score("AdaboostRegressor",y_test,y_pred)
+        self.__draw("AdaBoostRegressor",y_test,y_pred)
         
     def get_Training_columns():
         """
@@ -109,6 +137,28 @@ class model_l():
         print(f"R^2: {r2:.3f}")
         print("-----------END-----------")
 
+    def __draw(self,title,y_test,y_pred):
+        """繪圖"""
+        import matplotlib.pyplot as plt
+        # 繪製原始數據點
+        # 繪製原始數據點和預測值
+        
+        # 計算殘差
+        residuals = y_test - y_pred
+
+        # 繪製殘差圖
+        plt.figure(figsize=(8, 6))
+        plt.scatter(y_pred, residuals, color='blue')
+        plt.axhline(y=0, color='red', linestyle='-')
+        plt.title(f'Residual Plot_{title}')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Residuals')
+        plt.show()
+
+    def train(self):
+        """訓練"""
+    
+
     def main(self,use_smote=False):
         if not self.resource_data:
             print("未取得資料，終止執行");
@@ -118,6 +168,8 @@ class model_l():
         
         self.Linear(X_train, X_test, y_train, y_test)
         self.Elastic_net(X_train, X_test, y_train, y_test)
+        self.RidgeRegressor(X_train, X_test, y_train, y_test)
+        self.LassoRegressor(X_train, X_test, y_train, y_test)
         self.Adaboost_Regressor(X_train, X_test, y_train, y_test)
         self.Xgboost_Regressor(X_train, X_test, y_train, y_test)
 
