@@ -4,7 +4,15 @@ class model_l():
     def __init__(self) -> None:
             data = Data_seoul()
             self.resource_data = data.Source_trainingdata()
-
+            self.modelScore = {
+                "name":[],
+                "score":{
+                    "MAE":[],
+                    "MSE":[],
+                    "R^2":[],
+                    "RMSE":[]
+                }
+            }
     def Linear(self,X_train, X_test, y_train, y_test):
         """線性回歸"""
         from sklearn.linear_model import LinearRegression
@@ -136,6 +144,12 @@ class model_l():
         print(f"MAE: {mae:.3f}")
         print(f"R^2: {r2:.3f}")
         print("-----------END-----------")
+        # 儲存到暫存
+        self.modelScore["name"].append(title)
+        self.modelScore["score"]["MAE"].append(mae)
+        self.modelScore["score"]["MSE"].append(mse)
+        self.modelScore["score"]["RMSE"].append(rmse)
+        self.modelScore["score"]["R^2"].append(r2)
 
     def __draw(self,title,y_test,y_pred):
         """繪圖"""
@@ -155,8 +169,23 @@ class model_l():
         plt.ylabel('Residuals')
         plt.show()
 
-    def train(self):
-        """訓練"""
+    def ModelScoreToExcel(self):
+        """將模型績效進行儲存"""
+        import pandas as pd
+        if len(self.modelScore["name"]) == 0 :
+            print("無儲存任意模型績效")
+            return
+        df = pd.DataFrame(
+            {
+                "name":self.modelScore["name"],
+                "MAE":self.modelScore["score"]["MAE"],
+                "MSE":self.modelScore["score"]["MSE"],
+                "RMSE":self.modelScore["score"]["RMSE"],
+                "R^2":self.modelScore["score"]["R^2"]
+            }
+        )
+        df.to_excel("./result/RegressorResult.xlsx")
+        print("儲存成功")
     
 
     def main(self,use_smote=False):
@@ -172,6 +201,8 @@ class model_l():
         self.LassoRegressor(X_train, X_test, y_train, y_test)
         self.Adaboost_Regressor(X_train, X_test, y_train, y_test)
         self.Xgboost_Regressor(X_train, X_test, y_train, y_test)
+
+        self.ModelScoreToExcel()
 
 
 
