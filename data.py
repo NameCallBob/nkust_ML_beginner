@@ -119,8 +119,11 @@ class Data:
         print("5.資料縮放")
         self.data_scaler()
 
+
+import smogn
 class Data_seoul():
     """資料-首爾單車"""
+
     def data_clean(self,output_log=False):
         """資料清洗"""
         df = pd.read_csv("./SourceData/SeoulBikeData.csv",encoding='unicode_escape')
@@ -201,25 +204,27 @@ class Data_seoul():
         return X_train, X_test, y_train, y_test
 
 
-    def SMOTE_fitted_trainingdata(self,selected=False):
+    def SMOGN_fitted_trainingdata(self,selected=False):
         """
         利用SMOTE取得相同比例的資料
         @params selected -> 是否使用5折特徵
         """
         from imblearn.over_sampling import SMOTE
         self.df = self.data_encoder()
+        df_smogn = smogn.smoter(
+            data = self.df,
+            y = "Rented Bike Count",
+            k = 3)
+
         # 分割特徵
         if selected:
-            X = self.df[["age","workclass","education","occupation"]]
+            X = df_smogn[["age","workclass","education","occupation"]]
         else:
-            X = self.df.drop(columns=["Rented Bike Count","Date","Functioning Day"])
-        y = self.df["Rented Bike Count"]
-        # SMOTE
-        smote = SMOTE()
-        X_resampled, y_resampled = smote.fit_resample(X, y)
-        # 訓練資料分割
+            X = df_smogn.drop(columns=["Rented Bike Count","Date","Functioning Day"])
+        y = df_smogn["Rented Bike Count"]
+        
         X_train, X_test, y_train, y_test = train_test_split(
-        X_resampled, y_resampled, test_size=0.2, random_state=42)
+        X, y, test_size=0.2, random_state=42)
 
         return X_train, X_test, y_train, y_test
 
