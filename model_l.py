@@ -26,7 +26,7 @@ class model_l():
 
     def Elastic_net(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import ElasticNet
-        
+
         model = ElasticNet()
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
@@ -60,22 +60,22 @@ class model_l():
     def Xgboost_Regressor(self,X_train, X_test, y_train, y_test):
         """
         Xgboost
-        """ 
+        """
         from xgboost import XGBRegressor
 
-        model = XGBRegressor(objective='reg:squarederror', 
-                    n_estimators=100, 
-                    max_depth=3, 
+        model = XGBRegressor(objective='reg:squarederror',
+                    n_estimators=100,
+                    max_depth=3,
                     learning_rate=0.1,
                     random_state=42
                 )
-        
+
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
         self.__output_model_score("XGBoostRegressor",y_test,y_pred)
         self.__draw("XGboostRegessor",y_test,y_pred)
-            
+
     def Adaboost_Regressor(self,X_train, X_test, y_train, y_test):
         from sklearn.ensemble import AdaBoostRegressor
         from sklearn.tree import DecisionTreeRegressor
@@ -92,7 +92,10 @@ class model_l():
 
         self.__output_model_score("AdaboostRegressor",y_test,y_pred)
         self.__draw("AdaBoostRegressor",y_test,y_pred)
-        
+
+    def train(self):
+        pass
+
     def get_Training_columns():
         """
         獲得重點模型特徵
@@ -156,7 +159,7 @@ class model_l():
         import matplotlib.pyplot as plt
         # 繪製原始數據點
         # 繪製原始數據點和預測值
-        
+
         # 計算殘差
         residuals = y_test - y_pred
 
@@ -186,15 +189,15 @@ class model_l():
         )
         df.to_excel("./result/RegressorResult.xlsx")
         print("儲存成功")
-    
+
 
     def main(self,use_smote=False):
         if not self.resource_data:
             print("未取得資料，終止執行");
             return;
-    
+
         X_train, X_test, y_train, y_test = self.resource_data
-        
+
         self.Linear(X_train, X_test, y_train, y_test)
         self.Elastic_net(X_train, X_test, y_train, y_test)
         self.RidgeRegressor(X_train, X_test, y_train, y_test)

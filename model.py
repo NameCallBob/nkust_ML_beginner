@@ -72,7 +72,7 @@ class Model_c():
 
     def XGBoost_classifer(self,X_train, X_test, y_train, y_test):
         """XGBboost 分類"""
-        from xgboost import XGBClassifier 
+        from xgboost import XGBClassifier
 
         # 建立 XGBClassifier 模型
         xgboostModel = XGBClassifier(n_estimators=100, learning_rate= 0.3)
@@ -80,7 +80,7 @@ class Model_c():
         xgboostModel.fit(X_train, y_train)
         # 使用訓練資料預測分類
         y_pred = xgboostModel.predict(X_test)
-        
+
         self.__output_score("XGBoostModel",y_test,y_pred)
         self.draw_ROC_pic(xgboostModel,X_train, X_test, y_train, y_test,"XGBboost classifer")
 
@@ -107,8 +107,8 @@ class Model_c():
         svm_classifier.fit(X_train, y_train)
 
         y_pred = svm_classifier.predict(X_test)
-        
-        self.__output_score("ＳＶＭ 向量機學習",y_test,y_pred)
+
+        self.__output_score("SVM 向量機學習",y_test,y_pred)
         self.draw_ROC_pic(svm_classifier,X_train, X_test, y_train, y_test,"SVM model")
 
     def KNN(self,X_train, X_test, y_train, y_test):
@@ -119,7 +119,7 @@ class Model_c():
         knn_classifier.set_params(**param)
         knn_classifier.fit(X_train, y_train)
         y_pred = knn_classifier.predict(X_test)
-        
+
         self.__output_score("KNN模型",y_test,y_pred)
         self.draw_ROC_pic(knn_classifier,X_train, X_test, y_train, y_test,"KNN model")
 
@@ -187,7 +187,7 @@ class Model_c():
             X_train, X_test, y_train, y_test = self.smote_data
         else:
             X_train, X_test, y_train, y_test = self.resource_data
-        
+
         self.logistic(X_train, X_test, y_train, y_test)
         self.DecisionTree(X_train, X_test, y_train, y_test)
         self.RandomForest(X_train, X_test, y_train, y_test)
@@ -202,7 +202,7 @@ class Model_c():
         from sklearn.tree import DecisionTreeClassifier
         from sklearn.neighbors import KNeighborsClassifier
         from sklearn.svm import SVC
-        from xgboost import XGBClassifier 
+        from xgboost import XGBClassifier
         from sklearn.ensemble import AdaBoostClassifier
         from sklearn.ensemble import RandomForestClassifier
 
@@ -288,7 +288,7 @@ class Model_c():
                                  y_train,
                                  X_test)
 
-        
+
 
     def find_best_param(self,model,model_param,X_train,y_train,X_test):
         """找尋模型最佳參數"""
@@ -309,8 +309,8 @@ class Model_c():
 
         # 輸出預測結果
         print("Predictions:", predictions)
-        
-        
+
+
 
 
 if __name__ == "__main__":
