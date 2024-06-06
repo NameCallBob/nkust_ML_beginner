@@ -9,6 +9,27 @@ class Model_c():
         data = Data()
         self.smote_data = data.SMOTE_fitted_trainingdata()
         self.resource_data = data.Source_trainingdata()
+        self.model_score = {
+            "name" : [],
+            # 訓練集分數
+            "score":{
+                "cm":[],
+                "precision":[],
+                "accuracy":[],
+                "recall":[],
+                "f1":[],
+                "auc":[]
+            },
+            # 實際預測分數
+            "score_1":{
+                "cm":[],
+                "precision":[],
+                "accuracy":[],
+                "recall":[],
+                "f1":[],
+                "auc":[]
+            }
+        }
 
     def logistic(self,X_train, X_test, y_train, y_test):
         """羅吉斯回歸"""
@@ -23,9 +44,12 @@ class Model_c():
         model.fit(X_train, y_train)
 
         # 預測測試集
-        y_pred = model.predict(X_test)
+        y_pred_train = model.predict(X_train)
+        y_pred_test = model.predict(X_test)
 
-        self.__output_score("Logistic羅吉斯",y_test,y_pred)
+        self.__output_score("Logistic羅吉斯",y_train,y_pred_train,0)
+        self.__output_score("Logistic羅吉斯",y_test,y_pred_test,1)
+
         self.draw_ROC_pic(model,X_train, X_test, y_train, y_test,"Logistic")
 
     def DecisionTree(self,X_train, X_test, y_train, y_test):
@@ -45,18 +69,26 @@ class Model_c():
         model.fit(X_train, y_train)
 
         # 預測測試集
-        y_pred = model.predict(X_test)
-        self.__output_score("Decision決策樹",y_test,y_pred)
+        y_pred_train = model.predict(X_train)
+        y_pred_test = model.predict(X_test)
+
+        self.__output_score("Decision決策樹",y_train,y_pred_train,0)
+        self.__output_score("Decision決策樹",y_test,y_pred_test,1)
+
         self.draw_ROC_pic(model,X_train, X_test, y_train, y_test,"DecisionTree")
 
     def RandomForest(self,X_train, X_test, y_train, y_test):
         """隨機森林"""
         from sklearn.ensemble import RandomForestClassifier
-        rf_classifier = RandomForestClassifier(n_estimators=100, random_state=42)
-        rf_classifier.fit(X_train, y_train)
-        y_pred = rf_classifier.predict(X_test)
-        self.__output_score("ＲＦ隨機森林",y_test,y_pred)
-        self.draw_ROC_pic(rf_classifier,X_train, X_test, y_train, y_test,"RandomForest")
+        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model.fit(X_train, y_train)
+        # 預測測試集
+        y_pred_train = model.predict(X_train)
+        y_pred_test = model.predict(X_test)
+
+        self.__output_score("RandomForest",y_train,y_pred_train,0)
+        self.__output_score("RandomForest",y_test,y_pred_test,1)        
+        self.draw_ROC_pic(model,X_train, X_test, y_train, y_test,"RandomForest")
 
     def Adaboost_classifer(self,X_train, X_test, y_train, y_test):
         """"""
@@ -65,9 +97,12 @@ class Model_c():
         ada.fit(X_train, y_train)
 
         # 預測
-        y_pred = ada.predict(X_test)
-        # y_pred = np.argmax(y_pred,axis=1)
-        self.__output_score("Adaboost",y_test,y_pred)
+        # 預測測試集
+        y_pred_train = ada.predict(X_train)
+        y_pred_test = ada.predict(X_test)
+
+        self.__output_score("Adaboost",y_train,y_pred_train,0)
+        self.__output_score("Adaboost",y_test,y_pred_test,1)          
         self.draw_ROC_pic(ada,X_train, X_test, y_train, y_test,"adaboost")
 
     def XGBoost_classifer(self,X_train, X_test, y_train, y_test):
@@ -79,23 +114,13 @@ class Model_c():
         # 使用訓練資料訓練模型
         xgboostModel.fit(X_train, y_train)
         # 使用訓練資料預測分類
-        y_pred = xgboostModel.predict(X_test)
+        y_pred_train = xgboostModel.predict(X_train)
+        y_pred_test = xgboostModel.predict(X_test)
 
-        self.__output_score("XGBoostModel",y_test,y_pred)
+        self.__output_score("XGBoostModel",y_train,y_pred_train,0)
+        self.__output_score("XGBoostModel",y_test,y_pred_test,1)       
         self.draw_ROC_pic(xgboostModel,X_train, X_test, y_train, y_test,"XGBboost classifer")
 
-    def XGBoost_linear(self,X_train, X_test, y_train, y_test):
-        """XGBboost 線性"""
-        from xgboost import  XGBRegressor
-
-        # 建立 XGBRegressor 模型
-        xgboostModel = XGBRegressor(n_estimators=100, learning_rate= 0.3)
-        # 使用訓練資料訓練模型
-        xgboostModel.fit(X_train, y_train)
-        # 使用訓練資料預測分類
-        y_pred = xgboostModel.predict(X_test)
-
-        self.__output_score("XGBRegressor",y_test,y_pred)
 
     def SVM(self,X_train, X_test, y_train, y_test):
         """向量機模型"""
@@ -106,9 +131,12 @@ class Model_c():
 
         svm_classifier.fit(X_train, y_train)
 
-        y_pred = svm_classifier.predict(X_test)
+        y_pred_train = svm_classifier.predict(X_train)
+        y_pred_test = svm_classifier.predict(X_test)
 
-        self.__output_score("SVM 向量機學習",y_test,y_pred)
+        self.__output_score("SVM 向量機學習",y_train,y_pred_train,0)
+        self.__output_score("SVM 向量機學習",y_test,y_pred_test,1)     
+        
         self.draw_ROC_pic(svm_classifier,X_train, X_test, y_train, y_test,"SVM model")
 
     def KNN(self,X_train, X_test, y_train, y_test):
@@ -118,9 +146,13 @@ class Model_c():
         knn_classifier = KNeighborsClassifier()
         knn_classifier.set_params(**param)
         knn_classifier.fit(X_train, y_train)
-        y_pred = knn_classifier.predict(X_test)
+        
+        y_pred_train = knn_classifier.predict(X_train)
+        y_pred_test = knn_classifier.predict(X_test)
 
-        self.__output_score("KNN模型",y_test,y_pred)
+        self.__output_score("KNN模型",y_train,y_pred_train,0)
+        self.__output_score("KNN模型",y_test,y_pred_test,1)    
+
         self.draw_ROC_pic(knn_classifier,X_train, X_test, y_train, y_test,"KNN model")
 
 
@@ -151,23 +183,25 @@ class Model_c():
         plt.legend(loc="lower right")
         plt.show()
 
-    def __output_score(self,title,y_test,y_pred):
+    def __output_score(self,title,model_data,pred,status):
         """
         輸出模型績效指數
         @ title -> 模型標題
-        @ y_test -> 模型訓練集
-        @ y_pred -> 模型實際預測
+        @ model_data -> 模型資料
+        @ pred -> 模型實際預測
+        @ status -> 輸出模式(0:訓練集分數;1:測試集分數)
         """
         from sklearn.metrics import confusion_matrix, precision_score, accuracy_score, recall_score, f1_score , roc_auc_score
 
-        cm = confusion_matrix(y_test, y_pred)
-        precision = precision_score(y_test, y_pred)
-        accuracy = accuracy_score(y_test, y_pred)
-        recall = recall_score(y_test, y_pred)
-        f1 = f1_score(y_test, y_pred)
-        auc = roc_auc_score(y_test, y_pred)
+        cm = confusion_matrix(model_data, pred)
+        precision = precision_score(model_data, pred)
+        accuracy = accuracy_score(model_data, pred)
+        recall = recall_score(model_data, pred)
+        f1 = f1_score(model_data, pred)
+        auc = roc_auc_score(model_data, pred)
         # 輸出
         print(f"-----------{title}-----------")
+        print("----測試資料之模型績效----" if status  else "----訓練資料之模型績效----")
         print("Confusion Matrix:")
         print(cm)
         print()
@@ -177,7 +211,23 @@ class Model_c():
         print("F1 Score:", f1)
         print("AUC:", auc)
         print("-----------END-----------")
-
+        # 測試集
+        if status :
+            self.model_score["score_1"]["cm"].append(cm)
+            self.model_score["score_1"]["precision"].append(precision)
+            self.model_score["score_1"]["accuracy"].append(accuracy)
+            self.model_score["score_1"]["recall"].append(recall)
+            self.model_score["score_1"]["f1"].append(f1)
+            self.model_score["score_1"]["auc"].append(auc)
+            return;
+        # 訓練集
+        self.model_score["name"].append(title)
+        self.model_score["score"]["cm"].append(cm)
+        self.model_score["score"]["precision"].append(precision)
+        self.model_score["score"]["accuracy"].append(accuracy)
+        self.model_score["score"]["recall"].append(recall)
+        self.model_score["score"]["f1"].append(f1)
+        self.model_score["score"]["auc"].append(auc)    
 
     def main(self,use_smote=True):
         """主執行"""
@@ -195,6 +245,8 @@ class Model_c():
         self.Adaboost_classifer(X_train, X_test, y_train, y_test)
         self.SVM(X_train, X_test, y_train, y_test)
         self.KNN(X_train, X_test, y_train, y_test)
+
+        self.save_toExcel()
 
     def main_find(self,use_smote=True):
         """主要 尋找"""
@@ -309,6 +361,27 @@ class Model_c():
 
         # 輸出預測結果
         print("Predictions:", predictions)
+
+    def save_toExcel(self):
+        import pandas as pd 
+        pd.DataFrame(
+            {
+            "name":self.model_score["name"],
+            "cm_0":self.model_score["score"]["cm"],
+            "cm_1":self.model_score["score_1"]["cm"],
+            "pre_0":self.model_score["score"]["precision"],
+            "pre_1":self.model_score["score_1"]["precision"],
+            "acc_0":self.model_score["score"]["accuracy"],
+            "acc_1":self.model_score["score_1"]["accuracy"],
+            "recall_0":self.model_score["score"]["recall"],
+            "recall_1":self.model_score["score_1"]["recall"],
+            "f1_0":self.model_score["score"]["f1"],
+            "f1_1":self.model_score["score_1"]["f1"],
+            "auc_0":self.model_score["score"]["auc"],
+            "auc_1":self.model_score["score_1"]["auc"]
+            }
+        ).to_excel("./result/ClassiferResult.xlsx")
+        print("輸出完畢")
 
 
 
