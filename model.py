@@ -34,10 +34,7 @@ class Model_c():
     def logistic(self,X_train, X_test, y_train, y_test):
         """羅吉斯回歸"""
         from sklearn.linear_model import LogisticRegression
-        param = {'C': 10,
-             'penalty': 'l1'
-             ,'solver': 'liblinear'
-             }
+        param = {'C': 0.01, 'penalty': 'l2', 'solver': 'newton-cg'}
         model = LogisticRegression()
         model.set_params(**param)
         # 訓練模型
@@ -55,13 +52,13 @@ class Model_c():
     def DecisionTree(self,X_train, X_test, y_train, y_test):
         """決策樹"""
         from sklearn.tree import DecisionTreeClassifier
-        param = {'criterion': 'gini',
-             'max_depth': 10,
-             'max_features': None,
-             'max_leaf_nodes': None,
-             'min_samples_leaf': 1,
-             'min_samples_split': 2,
-             'splitter': 'best'}
+        param = {'criterion': 'entropy',
+                 'max_depth': 20,
+                 'max_features': None,
+                 'max_leaf_nodes': None,
+                 'min_samples_leaf': 2,
+                 'min_samples_split': 2,
+                 'splitter': 'random'}
         model = DecisionTreeClassifier(
                                        )
         model.set_params(**param)
@@ -80,7 +77,11 @@ class Model_c():
     def RandomForest(self,X_train, X_test, y_train, y_test):
         """隨機森林"""
         from sklearn.ensemble import RandomForestClassifier
-        model = RandomForestClassifier(n_estimators=100, random_state=42)
+        model = RandomForestClassifier(n_estimators=100,
+                           max_depth=5,
+                           min_samples_split=10,
+                           min_samples_leaf=5,
+                           random_state=42)
         model.fit(X_train, y_train)
         # 預測測試集
         y_pred_train = model.predict(X_train)
@@ -142,7 +143,7 @@ class Model_c():
     def KNN(self,X_train, X_test, y_train, y_test):
         """KNN模型"""
         from sklearn.neighbors import KNeighborsClassifier
-        param = {'algorithm': 'ball_tree', 'leaf_size': 20, 'n_neighbors': 3, 'p': 1, 'weights': 'distance'}
+        param = {'algorithm': 'ball_tree', 'leaf_size': 10, 'n_neighbors': 3, 'p': 1, 'weights': 'distance'}
         knn_classifier = KNeighborsClassifier()
         knn_classifier.set_params(**param)
         knn_classifier.fit(X_train, y_train)
@@ -386,5 +387,5 @@ if __name__ == "__main__":
 
     # 忽略所有警告
     warnings.filterwarnings('ignore')
-    # Model_c().main()
-    Model_c().main_find()
+    Model_c().main()
+    # Model_c().main_find()
