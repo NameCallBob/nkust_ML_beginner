@@ -59,8 +59,7 @@ class Model_c():
                  'min_samples_leaf': 2,
                  'min_samples_split': 2,
                  'splitter': 'random'}
-        model = DecisionTreeClassifier(
-                                       )
+        model = DecisionTreeClassifier()
         model.set_params(**param)
         # 訓練模型
         model.fit(X_train, y_train)
