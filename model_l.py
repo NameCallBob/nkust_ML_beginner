@@ -16,8 +16,9 @@ class model_l():
     def Linear(self,X_train, X_test, y_train, y_test):
         """線性回歸"""
         from sklearn.linear_model import LinearRegression
-
+        params = {'copy_X': True, 'fit_intercept': True, 'n_jobs': -1}
         model = LinearRegression()
+        model.set_params(**params)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
@@ -26,8 +27,9 @@ class model_l():
 
     def Elastic_net(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import ElasticNet
-
+        params ={'alpha': 0.1, 'copy_X': True, 'fit_intercept': True, 'l1_ratio': 0.9}
         model = ElasticNet()
+        model.set_params(**params)
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
@@ -35,9 +37,10 @@ class model_l():
         self.__draw("ElasticNet",y_test,y_pred)
     def RidgeRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Ridge
-
+        param =  {'alpha': 10.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': 100, 'tol': 0.001}
         # 建立Ridge模型並訓練
         ridge_model = Ridge()
+        ridge_model.set_params(**param)
         ridge_model.fit(X_train, y_train)
 
         # 進行預測
@@ -47,9 +50,10 @@ class model_l():
 
     def LassoRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Lasso
-
+        param = {'alpha': 0.1, 'copy_X': True, 'fit_intercept': True, 'max_iter': 100, 'tol': 0.001}
         # 建立LASSO模型並訓練
         lasso_model = Lasso()
+        lasso_model.set_params(**param)
         lasso_model.fit(X_train, y_train)
 
         # 進行預測
@@ -62,14 +66,17 @@ class model_l():
         Xgboost
         """
         from xgboost import XGBRegressor
-
-        model = XGBRegressor(objective='reg:squarederror',
-                    n_estimators=100,
-                    max_depth=3,
-                    learning_rate=0.1,
+        param = {'colsample_bytree': 1.0, 'gamma': 0, 'learning_rate': 0.05, 'max_depth': 7, 'min_child_weight': 3, 'n_estimators': 200, 'subsample': 0.6}
+        model = XGBRegressor(
+                    colsample_bytree = 1.0,
+                    gamma = 0,
+                    learning_rate = 0.05 ,
+                    max_depth = 7,
+                    min_child_weight = 3 ,
+                    n_estimators = 200,
+                    subsample = 0.6,
                     random_state=42
                 )
-
         model.fit(X_train, y_train)
         y_pred = model.predict(X_test)
 
@@ -78,15 +85,16 @@ class model_l():
 
     def Adaboost_Regressor(self,X_train, X_test, y_train, y_test):
         from sklearn.ensemble import AdaBoostRegressor
-        from sklearn.tree import DecisionTreeRegressor
 
         # 創建 AdaBoostRegressor 模型
-        base_estimator = DecisionTreeRegressor(max_depth=3)
-        model = AdaBoostRegressor(base_estimator=base_estimator, n_estimators=50, random_state=42)
-
+        model = AdaBoostRegressor(
+            learning_rate=0.1,
+            loss = 'linear',
+            n_estimators=100,
+            random_state=42
+        )
         # 訓練模型
         model.fit(X_train, y_train)
-
         # 評估模型
         y_pred = model.predict(X_test)
 
@@ -208,9 +216,38 @@ class model_l():
         self.ModelScoreToExcel()
 
 
+    def get_best_params(self):
+        import json
+        from sklearn.linear_model import LinearRegression,Lasso,Ridge,ElasticNet
+        from sklearn.ensemble import AdaBoostRegressor
+        from sklearn.model_selection import GridSearchCV
+        from xgboost import XGBRegressor
+
+        X_train, X_test, y_train, y_test = self.resource_data
+        with open('./model_train_params.json', 'r', encoding='utf-8') as file:
+            data = json.load(file)['regressor']
+            ml_model = [
+                LinearRegression(),Lasso(),Ridge(),
+                ElasticNet(),AdaBoostRegressor(),XGBRegressor()
+            ]
+            ml_model_p = [
+                data['linear'],data['lasso'],data['ridge'],
+                data['elastic'],data['ada'],data['xgb']
+            ]
+
+            for i in range(len(ml_model)):
+                grid_search = GridSearchCV(ml_model[i], ml_model_p[i], cv=5)
+                grid_search.fit(X_train, y_train)
+                print("Best Parameters:", grid_search.best_params_)
+
 
 
 
 
 if __name__ == "__main__":
+    import warnings
+
+    # 忽略所有警告
+    warnings.filterwarnings('ignore')
     model_l().main()
+    # model_l().get_best_params()

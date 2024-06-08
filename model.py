@@ -87,7 +87,7 @@ class Model_c():
         y_pred_test = model.predict(X_test)
 
         self.__output_score("RandomForest",y_train,y_pred_train,0)
-        self.__output_score("RandomForest",y_test,y_pred_test,1)        
+        self.__output_score("RandomForest",y_test,y_pred_test,1)
         self.draw_ROC_pic(model,X_train, X_test, y_train, y_test,"RandomForest")
 
     def Adaboost_classifer(self,X_train, X_test, y_train, y_test):
@@ -102,7 +102,7 @@ class Model_c():
         y_pred_test = ada.predict(X_test)
 
         self.__output_score("Adaboost",y_train,y_pred_train,0)
-        self.__output_score("Adaboost",y_test,y_pred_test,1)          
+        self.__output_score("Adaboost",y_test,y_pred_test,1)
         self.draw_ROC_pic(ada,X_train, X_test, y_train, y_test,"adaboost")
 
     def XGBoost_classifer(self,X_train, X_test, y_train, y_test):
@@ -118,7 +118,7 @@ class Model_c():
         y_pred_test = xgboostModel.predict(X_test)
 
         self.__output_score("XGBoostModel",y_train,y_pred_train,0)
-        self.__output_score("XGBoostModel",y_test,y_pred_test,1)       
+        self.__output_score("XGBoostModel",y_test,y_pred_test,1)
         self.draw_ROC_pic(xgboostModel,X_train, X_test, y_train, y_test,"XGBboost classifer")
 
 
@@ -135,8 +135,8 @@ class Model_c():
         y_pred_test = svm_classifier.predict(X_test)
 
         self.__output_score("SVM 向量機學習",y_train,y_pred_train,0)
-        self.__output_score("SVM 向量機學習",y_test,y_pred_test,1)     
-        
+        self.__output_score("SVM 向量機學習",y_test,y_pred_test,1)
+
         self.draw_ROC_pic(svm_classifier,X_train, X_test, y_train, y_test,"SVM model")
 
     def KNN(self,X_train, X_test, y_train, y_test):
@@ -146,19 +146,14 @@ class Model_c():
         knn_classifier = KNeighborsClassifier()
         knn_classifier.set_params(**param)
         knn_classifier.fit(X_train, y_train)
-        
+
         y_pred_train = knn_classifier.predict(X_train)
         y_pred_test = knn_classifier.predict(X_test)
 
         self.__output_score("KNN模型",y_train,y_pred_train,0)
-        self.__output_score("KNN模型",y_test,y_pred_test,1)    
+        self.__output_score("KNN模型",y_test,y_pred_test,1)
 
         self.draw_ROC_pic(knn_classifier,X_train, X_test, y_train, y_test,"KNN model")
-
-
-    def all_score(self,X_train,y_train,X_test,y_test):
-        """列出之模型績效"""
-        pass
 
     def draw_ROC_pic(self,model,X_train, X_test, y_train, y_test,model_name):
         import numpy as np
@@ -227,7 +222,7 @@ class Model_c():
         self.model_score["score"]["accuracy"].append(accuracy)
         self.model_score["score"]["recall"].append(recall)
         self.model_score["score"]["f1"].append(f1)
-        self.model_score["score"]["auc"].append(auc)    
+        self.model_score["score"]["auc"].append(auc)
 
     def main(self,use_smote=True):
         """主執行"""
@@ -363,7 +358,7 @@ class Model_c():
         print("Predictions:", predictions)
 
     def save_toExcel(self):
-        import pandas as pd 
+        import pandas as pd
         pd.DataFrame(
             {
             "name":self.model_score["name"],
@@ -387,5 +382,9 @@ class Model_c():
 
 
 if __name__ == "__main__":
-    Model_c().main()
-    # AllModel().main_find()
+    import warnings
+
+    # 忽略所有警告
+    warnings.filterwarnings('ignore')
+    # Model_c().main()
+    Model_c().main_find()
