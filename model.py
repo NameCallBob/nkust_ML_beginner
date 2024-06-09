@@ -142,7 +142,8 @@ class Model_c():
     def KNN(self,X_train, X_test, y_train, y_test):
         """KNN模型"""
         from sklearn.neighbors import KNeighborsClassifier
-        param = {'algorithm': 'ball_tree', 'leaf_size': 10, 'n_neighbors': 3, 'p': 1, 'weights': 'distance'}
+        
+        param = {'algorithm': 'ball_tree', 'leaf_size': 10, 'n_neighbors': 2, 'p': 1, 'weights': 'distance'}
         knn_classifier = KNeighborsClassifier()
         knn_classifier.set_params(**param)
         knn_classifier.fit(X_train, y_train)
@@ -154,6 +155,25 @@ class Model_c():
         self.__output_score("KNN模型",y_test,y_pred_test,1)
 
         self.draw_ROC_pic(knn_classifier,X_train, X_test, y_train, y_test,"KNN model")
+    def KNN_test(self,X_train, X_test, y_train, y_test):
+        # 嘗試不同的k值並使用指定的參數
+        from sklearn.model_selection import cross_val_score
+        from sklearn.neighbors import KNeighborsClassifier
+        import numpy as np
+
+        param = {'algorithm': 'ball_tree', 'leaf_size': 10, 'p': 1, 'weights': 'distance'}
+        k_range = range(1, 31)
+        k_scores = []
+
+        for k in k_range:
+            param['n_neighbors'] = k
+            knn = KNeighborsClassifier(**param)
+            scores = cross_val_score(knn, X_train, y_train, cv=10, scoring='accuracy')
+            k_scores.append(scores.mean())
+
+        # 找出最佳k值
+        best_k = k_range[np.argmax(k_scores)]
+        print(f'最佳k值: {best_k}, 平均準確率: {max(k_scores):.4f}')
 
     def draw_ROC_pic(self,model,X_train, X_test, y_train, y_test,model_name):
         import numpy as np
@@ -224,7 +244,7 @@ class Model_c():
         self.model_score["score"]["f1"].append(f1)
         self.model_score["score"]["auc"].append(auc)
 
-    def main(self,use_smote=True):
+    def main(self,use_smote=True,save=True):
         """主執行"""
         if not self.smote_data or not self.resource_data:
             print("未取得資料，終止執行");
@@ -240,8 +260,8 @@ class Model_c():
         self.Adaboost_classifer(X_train, X_test, y_train, y_test)
         self.SVM(X_train, X_test, y_train, y_test)
         self.KNN(X_train, X_test, y_train, y_test)
-
-        self.save_toExcel()
+        if save:
+            self.save_toExcel()
 
     def main_find(self,use_smote=True):
         """主要 尋找"""
@@ -334,8 +354,6 @@ class Model_c():
                                  X_train,
                                  y_train,
                                  X_test)
-
-
 
     def find_best_param(self,model,model_param,X_train,y_train,X_test):
         """找尋模型最佳參數"""
