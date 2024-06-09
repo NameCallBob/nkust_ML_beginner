@@ -9,6 +9,7 @@ class Model_c():
         data = Data()
         self.smote_data = data.SMOTE_fitted_trainingdata()
         self.resource_data = data.Source_trainingdata()
+        self.pca_smote_data = data.SMOTE_PCA_trainingData()
         self.model_score = {
             "name" : [],
             # 訓練集分數
@@ -143,7 +144,7 @@ class Model_c():
         """KNN模型"""
         from sklearn.neighbors import KNeighborsClassifier
         
-        param = {'algorithm': 'ball_tree', 'leaf_size': 10, 'n_neighbors': 2, 'p': 1, 'weights': 'distance'}
+        param = {'algorithm': 'auto', 'leaf_size': 50, 'n_neighbors':11, 'p': 1, 'weights': 'uniform'}
         knn_classifier = KNeighborsClassifier()
         knn_classifier.set_params(**param)
         knn_classifier.fit(X_train, y_train)
@@ -155,6 +156,7 @@ class Model_c():
         self.__output_score("KNN模型",y_test,y_pred_test,1)
 
         self.draw_ROC_pic(knn_classifier,X_train, X_test, y_train, y_test,"KNN model")
+
     def KNN_test(self,X_train, X_test, y_train, y_test):
         # 嘗試不同的k值並使用指定的參數
         from sklearn.model_selection import cross_val_score
@@ -244,12 +246,15 @@ class Model_c():
         self.model_score["score"]["f1"].append(f1)
         self.model_score["score"]["auc"].append(auc)
 
-    def main(self,use_smote=True,save=True):
+    def main(self,use_smote=True,pca=False,save=False):
         """主執行"""
         if not self.smote_data or not self.resource_data:
             print("未取得資料，終止執行");
         if use_smote:
-            X_train, X_test, y_train, y_test = self.smote_data
+            if pca:
+                X_train, X_test, y_train, y_test = self.pca_smote_data
+            else:
+                X_train, X_test, y_train, y_test = self.smote_data
         else:
             X_train, X_test, y_train, y_test = self.resource_data
 
@@ -260,6 +265,7 @@ class Model_c():
         self.Adaboost_classifer(X_train, X_test, y_train, y_test)
         self.SVM(X_train, X_test, y_train, y_test)
         self.KNN(X_train, X_test, y_train, y_test)
+
         if save:
             self.save_toExcel()
 
