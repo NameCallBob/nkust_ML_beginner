@@ -55,7 +55,7 @@ class Data:
 
     def data_encoder(self):
         """資料預處理，含分割資料、資料轉換"""
-        import numpy as np 
+        import numpy as np
         df = self.data_clean()
         label_encoder = LabelEncoder()
         scaler = StandardScaler()
@@ -192,17 +192,18 @@ class Data_seoul():
 
     def data_encoder(self):
         """資料預處理，含分割資料、資料轉換"""
+        import numpy as np
         df = self.data_clean()
         label_encoder = LabelEncoder()
         scaler = StandardScaler()
-        for column in df.select_dtypes(include=['float64', 'int64']).columns:
-            df[column] = scaler.fit_transform(df[column])
+        # for column in df.select_dtypes(include=['float64', 'int64']).columns:
+        #     tmp = np.array(df[column])
+        #     df[column] = scaler.fit_transform(tmp.reshape(-1,1))
 
         for column in df.select_dtypes(include='object').columns:
             df[column] = label_encoder.fit_transform(df[column])
             # 字典內容
             # le_name_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
-
 
         """
         字典內容：
@@ -214,22 +215,7 @@ class Data_seoul():
 
         return df
 
-    def data_split(self):
-        origin_df = self.data_clean()
-        encoded_df = self.data_encoder()
-        print("挑選特徵欄位將資料分開") ; print("以下是分割後的訓練資料")
-        X_train, X_val, y_train, y_val = train_test_split(encoded_df[['sex','race','education']], encoded_df['salary'], test_size=0.2, random_state=42)
-        # print(X_train);print(y_train)
-        return X_train, X_val, y_train, y_val
 
-    def data_scaler(self):
-        encoded_df = self.data_encoder()
-        scaler = MinMaxScaler()
-        scaler.fit(encoded_df)
-        scaled_training_data = scaler.transform(encoded_df)
-        print("縮放後的資料：")
-        print(scaled_training_data)
-        return scaled_training_data
 
     def Source_trainingdata(self,selected=False):
         """原資料得訓練資料"""
@@ -246,6 +232,16 @@ class Data_seoul():
 
         return X_train, X_test, y_train, y_test
 
+    def Source_trainingdata_getXY(self,selected=False):
+        """拿取XY"""
+        self.df = self.data_encoder()
+        if selected:
+            X = self.df[["age","workclass","education","occupation"]]
+        else:
+            X = self.df.drop(columns=["Rented Bike Count","Date","Functioning Day"])
+
+        y = self.df["Rented Bike Count"]
+        return X,y
 
 
 
