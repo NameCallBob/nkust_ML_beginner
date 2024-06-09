@@ -31,6 +31,8 @@ class Model_c():
                 "auc":[]
             }
         }
+        self.count = 0
+        self.roc_data = []
 
     def logistic(self,X_train, X_test, y_train, y_test):
         """羅吉斯回歸"""
@@ -183,14 +185,23 @@ class Model_c():
         from sklearn.metrics import roc_curve, auc
         y_score = model.predict_proba(X_test)[:, 1]
         # 計算ROC曲線
-        xgb_fpr, xgb_tpr, _ = roc_curve(y_test, y_score)
-
+        fpr, tpr, _ = roc_curve(y_test, y_score)
         # 計算AUC
-        xgb_auc = auc(xgb_fpr, xgb_tpr)
+        roc_auc = auc(fpr, tpr)
+        # 儲存ROC數據
+        self.roc_data.append((fpr, tpr, roc_auc, model_name))
+        self.count += 1
 
-        # 繪製ROC曲線
+        # 如果count達到14，繪製所有ROC曲線
+        if self.count == 7:
+            self.plot_all_roc_curves()
+        plt.show()
+
+    def plot_all_roc_curves(self):
+        import matplotlib.pyplot as plt
         plt.figure()
-        plt.plot(xgb_fpr, xgb_tpr, color='blue', lw=2, label=f'{model_name} ROC curve (area = {xgb_auc:.2f})')
+        for fpr, tpr, roc_auc, model_name in self.roc_data:
+            plt.plot(fpr, tpr, lw=2, label=f'{model_name} ROC curve (area = {roc_auc:.2f})')
         plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
         plt.xlim([0.0, 1.0])
         plt.ylim([0.0, 1.05])
@@ -198,6 +209,7 @@ class Model_c():
         plt.ylabel('True Positive Rate')
         plt.title('Receiver Operating Characteristic')
         plt.legend(loc="lower right")
+        plt.savefig('pic/output_AllModelROC.png')
         plt.show()
 
     def __output_score(self,title,model_data,pred,status):
@@ -408,7 +420,7 @@ class Model_c():
 if __name__ == "__main__":
     import warnings
 
-    # 忽略所有警告
+    # 忽略所有警告  
     warnings.filterwarnings('ignore')
-    Model_c().main()
+    Model_c().main(save=True)
     # Model_c().main_find()
