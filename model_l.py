@@ -20,10 +20,10 @@ class model_l():
         model = LinearRegression()
         model.set_params(**params)
         model.fit(X_train, y_train)
+        y_train_pred = model.predict(X_train)
         y_pred = model.predict(X_test)
-
         self.__output_model_score("LinearRegression",y_test,y_pred)
-        self.__draw("LinearRegression",y_test,y_pred)
+        self.__draw("LinearRegression",y_train,y_train_pred,y_test,y_pred)
 
     def Elastic_net(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import ElasticNet
@@ -31,10 +31,10 @@ class model_l():
         model = ElasticNet()
         model.set_params(**params)
         model.fit(X_train, y_train)
+        y_train_pred = model.predict(X_train)
         y_pred = model.predict(X_test)
-
         self.__output_model_score("ElasticNet",y_test,y_pred)
-        self.__draw("ElasticNet",y_test,y_pred)
+        self.__draw("ElasticNet",y_train,y_train_pred,y_test,y_pred)
     def RidgeRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Ridge
         param =  {'alpha': 10.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': 100, 'tol': 0.001}
@@ -45,8 +45,9 @@ class model_l():
 
         # 進行預測
         y_pred = ridge_model.predict(X_test)
+        y_train_pred = ridge_model.predict(X_train)
         self.__output_model_score("Ridge",y_test,y_pred)
-        self.__draw("Ridge",y_test,y_pred)
+        self.__draw("Ridge",y_train,y_train_pred,y_test,y_pred)
 
     def LassoRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Lasso
@@ -58,8 +59,9 @@ class model_l():
 
         # 進行預測
         y_pred = lasso_model.predict(X_test)
+        y_train_pred = lasso_model.predict(X_train)
         self.__output_model_score("Lasso",y_test,y_pred)
-        self.__draw("Lasso",y_test,y_pred)
+        self.__draw("Lasso",y_train,y_train_pred,y_test,y_pred)
 
     def Xgboost_Regressor(self,X_train, X_test, y_train, y_test):
         """
@@ -78,10 +80,10 @@ class model_l():
                     random_state=42
                 )
         model.fit(X_train, y_train)
+        y_train_pred = model.predict(X_train)
         y_pred = model.predict(X_test)
-
         self.__output_model_score("XGBoostRegressor",y_test,y_pred)
-        self.__draw("XGboostRegessor",y_test,y_pred)
+        self.__draw("XGboostRegessor",y_train,y_train_pred,y_test,y_pred)
 
     def Adaboost_Regressor(self,X_train, X_test, y_train, y_test):
         from sklearn.ensemble import AdaBoostRegressor
@@ -96,10 +98,11 @@ class model_l():
         # 訓練模型
         model.fit(X_train, y_train)
         # 評估模型
+        y_train_pred = model.predict(X_train)
         y_pred = model.predict(X_test)
 
         self.__output_model_score("AdaboostRegressor",y_test,y_pred)
-        self.__draw("AdaBoostRegressor",y_test,y_pred)
+        self.__draw("AdaBoostRegressor",y_train,y_train_pred,y_test,y_pred)
 
     def train(self):
         pass
@@ -162,23 +165,39 @@ class model_l():
         self.modelScore["score"]["RMSE"].append(rmse)
         self.modelScore["score"]["R^2"].append(r2)
 
-    def __draw(self,title,y_test,y_pred):
+    def __draw(self,title,y_train, y_train_pred, y_test, y_test_pred):
         """繪圖"""
         import matplotlib.pyplot as plt
-        # 繪製原始數據點
-        # 繪製原始數據點和預測值
+        import os
+
+        # 建立pic資料夾如果它不存在
+        if not os.path.exists('pic'):
+            os.makedirs('pic')
 
         # 計算殘差
-        residuals = y_test - y_pred
+        train_residuals = y_train - y_train_pred
+        test_residuals = y_test - y_test_pred
 
         # 繪製殘差圖
-        plt.figure(figsize=(8, 6))
-        plt.scatter(y_pred, residuals, color='blue')
+        plt.figure(figsize=(10, 6))
+        
+        # 繪製訓練資料的殘差
+        plt.scatter(y_train_pred, train_residuals, color='blue', alpha=0.5, label='Train Data')
+        
+        # 繪製測試資料的殘差
+        plt.scatter(y_test_pred, test_residuals, color='green', alpha=0.5, label='Test Data')
+        
+        # 劃一條 y=0 的紅色水平線
         plt.axhline(y=0, color='red', linestyle='-')
+        
         plt.title(f'Residual Plot_{title}')
         plt.xlabel('Predicted Values')
         plt.ylabel('Residuals')
+        plt.legend()
+        plt.savefig(f'pic/output_{title}.png')
         plt.show()
+
+        
 
     def ModelScoreToExcel(self):
         """將模型績效進行儲存"""
