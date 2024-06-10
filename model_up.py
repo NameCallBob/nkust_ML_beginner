@@ -55,7 +55,7 @@ class UP:
         y_pred = eclf.predict(X_test)
         self.__output_score("votting", y_test, y_pred, 1)
 
-        self.__drawOneROC(eclf,X_train, X_test, y_train, y_test,"RandomForest")
+        self.__drawOneROC(eclf,X_train, X_test, y_train, y_test,"Volt")
 
 
     def way2_ploy(self):
