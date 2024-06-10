@@ -215,33 +215,61 @@ class Data_seoul():
 
         return df
 
-
-
-    def Source_trainingdata(self,selected=False):
-        """原資料得訓練資料"""
+    def Source_trainingdata_forClassifer(self,selected=False):
+        """將Rented Bike變為類別"""
         self.df = self.data_encoder()
-        if selected:
-            X = self.df[["age","workclass","education","occupation"]]
-        else:
-            X = self.df.drop(columns=["Rented Bike Count","Date","Functioning Day"])
+        # 計算四分位數
+        q1 = self.df['Rented Bike Count'].quantile(0.25)
+        q2 = self.df['Rented Bike Count'].quantile(0.5)
+        q3 = self.df['Rented Bike Count'].quantile(0.75)
+        # 定義分類函數
+        def classify(value):
+            if value <= q1:
+                # return 'Very Low Rented'
+                return 0
+            elif value <= q2:
+                # return 'Low Rented'
+                return 1
+            elif value <= q3:
+                # return 'High Rented'
+                return 2
+            else:
+                # return 'Very High Rented'
+                return 3
 
-        y = self.df["Rented Bike Count"]
+        # 將分類應用到DataFrame中
+        self.df['Rented Bike Count Classifer'] = self.df['Rented Bike Count'].apply(classify)
+        X = self.df.drop(columns=[
+            "Rented Bike Count","Date","Functioning Day","Rented Bike Count Classifer"
+        ])
+        y = self.df["Rented Bike Count Classifer"]
+
 
         X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.2, random_state=42)
 
         return X_train, X_test, y_train, y_test
 
+    def Source_trainingdata(self,selected=False):
+        """原資料得訓練資料"""
+        self.df = self.data_encoder()
+
+        X = self.df.drop(columns=["Rented Bike Count","Date","Functioning Day"])
+        y = self.df["Rented Bike Count"]
+
+        X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42)
+        print("資料OK")
+        return X_train, X_test, y_train, y_test
+
     def Source_trainingdata_getXY(self,selected=False):
         """拿取XY"""
         self.df = self.data_encoder()
-        if selected:
-            X = self.df[["age","workclass","education","occupation"]]
-        else:
-            X = self.df.drop(columns=["Rented Bike Count","Date","Functioning Day"])
-
+        tmp_df = self.data_clean()
+        X = self.df.drop(columns=["Rented Bike Count","Date","Functioning Day"])
+        X_origin = tmp_df.drop(columns=["Rented Bike Count","Functioning Day"])
         y = self.df["Rented Bike Count"]
-        return X,y
+        return X,y,X_origin
 
 
 

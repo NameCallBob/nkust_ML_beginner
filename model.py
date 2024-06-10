@@ -156,7 +156,7 @@ class Model_c():
     def KNN(self,X_train, X_test, y_train, y_test):
         """KNN模型"""
         from sklearn.neighbors import KNeighborsClassifier
-        
+
         param = {'algorithm': 'auto', 'leaf_size': 50, 'n_neighbors':11, 'p': 1, 'weights': 'uniform'}
         knn_classifier = KNeighborsClassifier()
         knn_classifier.set_params(**param)
@@ -404,7 +404,7 @@ class Model_c():
         # 輸出預測結果
         print("Predictions:", predictions)
 
-    def save_toExcel(self):
+    def save_toExcel(self,name="ClassiferResult.xlsx"):
         import pandas as pd
         pd.DataFrame(
             {
@@ -422,16 +422,14 @@ class Model_c():
             "auc_0":self.model_score["score"]["auc"],
             "auc_1":self.model_score["score_1"]["auc"]
             }
-        ).to_excel("./result/ClassiferResult.xlsx")
+        ).to_excel(f"./result/{name}")
+
         print("輸出完畢")
-
-
-
 
 if __name__ == "__main__":
     import warnings
 
-    # 忽略所有警告  
+    # 忽略所有警告
     warnings.filterwarnings('ignore')
     Model_c().main(save=True)
     # Model_c().main_find()

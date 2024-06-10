@@ -16,7 +16,10 @@ from sklearn.ensemble import VotingClassifier
 from sklearn.linear_model import LogisticRegression
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.svm import SVC
-from data import Data , Data_seoul
+from data import Data, Data_seoul
+import pandas as pd
+
+
 class UP:
     def way1_vote(self):
         """升級方法-> 採集成訓練:VOTE"""
@@ -26,80 +29,117 @@ class UP:
         clf1 = LogisticRegression()
         clf1.set_params(**{
             'C': 0.01, 'penalty': 'l2', 'solver': 'newton-cg'
-            })
+        })
         clf2 = DecisionTreeClassifier()
         clf2.set_params(
             **{'criterion': 'entropy',
-                 'max_depth': 20,
-                 'max_features': None,
-                 'max_leaf_nodes': None,
-                 'min_samples_leaf': 2,
-                 'min_samples_split': 2,
-                 'splitter': 'random'})
+               'max_depth': 20,
+               'max_features': None,
+               'max_leaf_nodes': None,
+               'min_samples_leaf': 2,
+               'min_samples_split': 2,
+               'splitter': 'random'})
         clf3 = SVC(
             probability=True
         )
 
         # 定義投票分類器（軟投票）
-        eclf = VotingClassifier(estimators=[('lr', clf1), ('dt', clf2), ('svc', clf3)], voting='soft')
+        eclf = VotingClassifier(
+            estimators=[('lr', clf1), ('dt', clf2), ('svc', clf3)], voting='hard')
 
         # 訓練投票分類器
         eclf.fit(X_train, y_train)
         y_pred = eclf.predict(X_train)
-        self.__output_score("votting",y_train,y_pred,0)
+        self.__output_score("votting", y_train, y_pred, 0)
         # 評估模型性能
         y_pred = eclf.predict(X_test)
-        self.__output_score("votting",y_test,y_pred,1)
+        self.__output_score("votting", y_test, y_pred, 1)
+
+        self.__drawOneROC(eclf,X_train, X_test, y_train, y_test,"RandomForest")
+
 
     def way2_ploy(self):
-        """分段線性回歸"""
+        """多項線性回歸"""
         from sklearn.linear_model import LinearRegression
         from sklearn.preprocessing import PolynomialFeatures
         from sklearn.metrics import mean_squared_error, r2_score
         import matplotlib.pyplot as plt
-        X,y = Data_seoul().Source_trainingdata_getXY()
+
+        def draw_OriginScatterPic(title, X_origin, y, X_train, y_train_pred, X_test, y_test_pred):
+            # 視覺化結果
+            # 準備網格數據用於繪圖
+            import numpy as np
+            X_pred = np.linspace(0, 1, 100).reshape(-1, 1)
+            X_pred_poly = poly.transform(X_pred)
+            Y_pred = model.predict(X_pred_poly)
+            # 繪製數據點和回歸曲線
+            plt.scatter(X_train, y_train, color='blue', label='Training Data')
+            plt.scatter(X_test, y_test, color='green', label='Test Data')
+            plt.plot(X_pred, Y_pred, color='red',
+                     label='Polynomial Regression Curve')
+            plt.title(title)
+            plt.legend()
+            plt.xlabel('X_date')
+            plt.ylabel('y_Rented Bike')
+            plt.show()
+
+        X, y, X_origin = Data_seoul().Source_trainingdata_getXY()
         X_train, X_test, y_train, y_test = Data_seoul().Source_trainingdata()
 
         # 建立多項式特徵
-        poly = PolynomialFeatures(degree=3)
+        poly = PolynomialFeatures(degree=2)
         X_train_poly = poly.fit_transform(X_train)
         X_test_poly = poly.transform(X_test)
 
-        # 建立線性回歸模型
+        # Linear
         model = LinearRegression()
         model.fit(X_train_poly, y_train)
-
         # 預測
         y_train_pred = model.predict(X_train_poly)
         y_test_pred = model.predict(X_test_poly)
 
-        # 評估模型
-        train_mse = mean_squared_error(y_train, y_train_pred)
-        test_mse = mean_squared_error(y_test, y_test_pred)
-        train_r2 = r2_score(y_train, y_train_pred)
-        test_r2 = r2_score(y_test, y_test_pred)
+        self.__output_model_score("Ploy_Linear_train", y_train, y_train_pred)
+        self.__output_model_score("Ploy_Linear_test", y_test, y_test_pred)
 
-        print(f"訓練集 MSE: {train_mse}")
-        print(f"測試集 MSE: {test_mse}")
-        
-        print(f"訓練集 R^2: {train_r2}")
-        print(f"測試集 R^2: {test_r2}")
+        self.__draw("ploy_linear", y_train, y_train_pred, y_test, y_test_pred)
+        from sklearn.linear_model import Lasso
 
-        # 視覺化結果
-        plt.scatter(X['Humidity(%)'], y, color='black', label='數據點')
-        plt.plot(X_train, y_train_pred, color='blue', linewidth=2, label='訓練集擬合')
-        plt.plot(X_test, y_test_pred, color='red', linewidth=2, linestyle='dashed', label='測試集擬合')
-        plt.xlabel('X')
-        plt.ylabel('y')
-        plt.legend()
-        plt.show()
+        # Lasso_l1
+        model = Lasso()
+        model.set_params(**
+                         {'alpha': 0.1, 'copy_X': True, 'fit_intercept': True,
+                             'max_iter': 100, 'tol': 0.001}
+                         )
+        model.fit(X_train_poly, y_train)
+        # 預測
+        y_train_pred = model.predict(X_train_poly)
+        y_test_pred = model.predict(X_test_poly)
 
-        self.__draw("ploy",y_train, y_train_pred, y_test, y_test_pred)
+        self.__output_model_score("Ploy_Lasso_train", y_train, y_train_pred)
+        self.__output_model_score("Ploy_Lasso_test", y_test, y_test_pred)
+        self.__draw("ploy_lasso", y_train, y_train_pred, y_test, y_test_pred)
+
+        # Ridge_L2
+        from sklearn.linear_model import Ridge
+        model = Ridge()
+        model.set_params(**
+                         {'alpha': 10.0, 'copy_X': True, 'fit_intercept': True,
+                             'max_iter': 100, 'tol': 0.001}
+                         )
+        model.fit(X_train_poly, y_train)
+        # 預測
+        y_train_pred = model.predict(X_train_poly)
+        y_test_pred = model.predict(X_test_poly)
+
+        self.__output_model_score("Ploy_Ridge_train", y_train, y_train_pred)
+        self.__output_model_score("Ploy_Ridge_test", y_test, y_test_pred)
+
+        self.__draw("ploy_ridge", y_train, y_train_pred, y_test, y_test_pred)
 
     def way3_(self):
         """"""
 
-    def __output_score(self,title,model_data,pred,status):
+    def __output_score(self, title, model_data, pred, status):
         """
         輸出模型績效指數
         @ title -> 模型標題
@@ -107,7 +147,7 @@ class UP:
         @ pred -> 模型實際預測
         @ status -> 輸出模式(0:訓練集分數;1:測試集分數)
         """
-        from sklearn.metrics import confusion_matrix, precision_score, accuracy_score, recall_score, f1_score , roc_auc_score
+        from sklearn.metrics import confusion_matrix, precision_score, accuracy_score, recall_score, f1_score, roc_auc_score
 
         cm = confusion_matrix(model_data, pred)
         precision = precision_score(model_data, pred)
@@ -117,7 +157,7 @@ class UP:
         auc = roc_auc_score(model_data, pred)
         # 輸出
         print(f"-----------{title}-----------")
-        print("----測試資料之模型績效----" if status  else "----訓練資料之模型績效----")
+        print("----測試資料之模型績效----" if status else "----訓練資料之模型績效----")
         print("Confusion Matrix:")
         print(cm)
         print()
@@ -128,38 +168,78 @@ class UP:
         print("AUC:", auc)
         print("-----------END-----------")
 
-    def __draw(self,title,y_train, y_train_pred, y_test, y_test_pred):
-            """繪圖"""
-            import matplotlib.pyplot as plt
-            import os
+    def __output_model_score(self, title, y_test, y_pred):
+        """
+        輸出模型績效
+        """
+        from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
 
-            # 建立pic資料夾如果它不存在
-            if not os.path.exists('pic'):
-                os.makedirs('pic')
+        mse = mean_squared_error(y_test, y_pred)
+        mae = mean_absolute_error(y_test, y_pred)
+        rmse = mean_squared_error(y_test, y_pred, squared=False)
+        r2 = r2_score(y_test, y_pred)
+        print(f"-----------{title}-----------")
+        print(f"MSE: {mse:.3f}")
+        print(f"RMSE: {rmse:.3f}")
+        print(f"MAE: {mae:.3f}")
+        print(f"R^2: {r2:.3f}")
+        print("-----------END-----------")
 
-            # 計算殘差
-            train_residuals = y_train - y_train_pred
-            test_residuals = y_test - y_test_pred
+    def __draw(self, title, y_train, y_train_pred, y_test, y_test_pred):
+        """繪圖"""
+        import matplotlib.pyplot as plt
+        import os
 
-            # 繪製殘差圖
-            plt.figure(figsize=(10, 6))
+        # 建立pic資料夾如果它不存在
+        if not os.path.exists('pic'):
+            os.makedirs('pic')
 
-            # 繪製訓練資料的殘差
-            plt.scatter(y_train_pred, train_residuals, color='blue', alpha=0.5, label='Train Data')
+        # 計算殘差
+        train_residuals = y_train - y_train_pred
+        test_residuals = y_test - y_test_pred
 
-            # 繪製測試資料的殘差
-            plt.scatter(y_test_pred, test_residuals, color='green', alpha=0.5, label='Test Data')
+        # 繪製殘差圖
+        plt.figure(figsize=(10, 6))
 
-            # 劃一條 y=0 的紅色水平線
-            plt.axhline(y=0, color='red', linestyle='-')
+        # 繪製訓練資料的殘差
+        plt.scatter(y_train_pred, train_residuals,
+                    color='blue', alpha=0.5, label='Train Data')
 
-            plt.title(f'Residual Plot_{title}')
-            plt.xlabel('Predicted Values')
-            plt.ylabel('Residuals')
-            plt.legend()
-            plt.savefig(f'pic/output_{title}.png')
-            plt.show()
+        # 繪製測試資料的殘差
+        plt.scatter(y_test_pred, test_residuals, color='green',
+                    alpha=0.5, label='Test Data')
+
+        # 劃一條 y=0 的紅色水平線
+        plt.axhline(y=0, color='red', linestyle='-')
+
+        plt.title(f'Residual Plot_{title}')
+        plt.xlabel('Predicted Values')
+        plt.ylabel('Residuals')
+        plt.legend()
+        plt.savefig(f'pic/output_{title}.png')
+        plt.show()
+
+    def __drawOneROC(self,model,X_train, X_test, y_train, y_test,model_name):
+        import numpy as np
+        import matplotlib.pyplot as plt
+        from sklearn.metrics import roc_curve, auc
+        y_score = model.predict_proba(X_test)[:, 1]
+        # 計算ROC曲線
+        fpr, tpr, _ = roc_curve(y_test, y_score)
+        # 計算AUC
+        roc_auc = auc(fpr, tpr)
+        plt.figure()
+        plt.plot(fpr, tpr, lw=2, label=f'{model_name} ROC curve (area = {roc_auc:.2f})')
+        plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
+        plt.xlim([0.0, 1.0])
+        plt.ylim([0.0, 1.05])
+        plt.xlabel('False Positive Rate')
+        plt.ylabel('True Positive Rate')
+        plt.title('Receiver Operating Characteristic')
+        plt.legend(loc="lower right")
+        plt.savefig(f'pic/output_{model_name}.png')
+        plt.show()
 
 if __name__ == "__main__":
-    # UP().way1_vote()
+    UP().way1_vote()
     UP().way2_ploy()

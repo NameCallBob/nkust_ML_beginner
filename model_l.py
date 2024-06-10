@@ -47,6 +47,7 @@ class model_l():
         y_pred = model.predict(X_test)
         self.__output_model_score("ElasticNet",y_test,y_pred)
         self.__draw("ElasticNet",y_train,y_train_pred,y_test,y_pred)
+
     def RidgeRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Ridge
         param =  {'alpha': 10.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': 100, 'tol': 0.001}
@@ -80,7 +81,6 @@ class model_l():
         Xgboost
         """
         from xgboost import XGBRegressor
-        param = {'colsample_bytree': 1.0, 'gamma': 0, 'learning_rate': 0.05, 'max_depth': 7, 'min_child_weight': 3, 'n_estimators': 200, 'subsample': 0.6}
         model = XGBRegressor(
                     colsample_bytree = 1.0,
                     gamma = 0,
@@ -192,16 +192,16 @@ class model_l():
 
         # 繪製殘差圖
         plt.figure(figsize=(10, 6))
-        
+
         # 繪製訓練資料的殘差
         plt.scatter(y_train_pred, train_residuals, color='blue', alpha=0.5, label='Train Data')
-        
+
         # 繪製測試資料的殘差
         plt.scatter(y_test_pred, test_residuals, color='green', alpha=0.5, label='Test Data')
-        
+
         # 劃一條 y=0 的紅色水平線
         plt.axhline(y=0, color='red', linestyle='-')
-        
+
         plt.title(f'Residual Plot_{title}')
         plt.xlabel('Predicted Values')
         plt.ylabel('Residuals')
@@ -209,7 +209,7 @@ class model_l():
         plt.savefig(f'pic/output_{title}.png')
         plt.show()
 
-        
+
 
     def ModelScoreToExcel(self):
         """將模型績效進行儲存"""
