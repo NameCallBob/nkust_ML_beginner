@@ -24,7 +24,6 @@ class UP:
     def way1_vote(self):
         """升級方法-> 採集成訓練:VOTE"""
         X_train, X_test, y_train, y_test = Data().SMOTE_fitted_trainingdata()
-
         # 定義基模型
         clf1 = LogisticRegression()
         clf1.set_params(**{
@@ -45,7 +44,7 @@ class UP:
 
         # 定義投票分類器（軟投票）
         eclf = VotingClassifier(
-            estimators=[('lr', clf1), ('dt', clf2), ('svc', clf3)], voting='hard')
+            estimators=[('lr', clf1), ('dt', clf2), ('svc', clf3)], voting='soft')
 
         # 訓練投票分類器
         eclf.fit(X_train, y_train)
@@ -55,7 +54,7 @@ class UP:
         y_pred = eclf.predict(X_test)
         self.__output_score("votting", y_test, y_pred, 1)
 
-        self.__drawOneROC(eclf,X_train, X_test, y_train, y_test,"Volt")
+        self.__drawOneROC(eclf,X_train, X_test, y_train, y_test,"Voting")
 
 
     def way2_ploy(self):
@@ -88,6 +87,7 @@ class UP:
 
         # 建立多項式特徵
         poly = PolynomialFeatures(degree=2)
+        # poly = PolynomialFeatures(degree=3)
         X_train_poly = poly.fit_transform(X_train)
         X_test_poly = poly.transform(X_test)
 
@@ -242,4 +242,4 @@ class UP:
 
 if __name__ == "__main__":
     UP().way1_vote()
-    UP().way2_ploy()
+    # UP().way2_ploy()
