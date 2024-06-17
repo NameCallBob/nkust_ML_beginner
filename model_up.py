@@ -136,9 +136,6 @@ class UP:
 
         self.__draw("ploy_ridge", y_train, y_train_pred, y_test, y_test_pred)
 
-    def way3_(self):
-        """"""
-
     def __output_score(self, title, model_data, pred, status):
         """
         輸出模型績效指數

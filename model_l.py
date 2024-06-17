@@ -29,6 +29,17 @@ class model_l():
         """線性回歸"""
         from sklearn.linear_model import LinearRegression
         params = {'copy_X': True, 'fit_intercept': True, 'n_jobs': -1}
+        """
+        copy_X=True:
+
+        指定是否在訓練前複製 X；避免原始數據被修改。
+        fit_intercept=True:
+
+        指定是否計算截距項；如果設置為 False，模型不會計算截距。
+        n_jobs=-1:
+
+        用於計算的 CPU 核心數；-1 表示使用所有可用的 CPU 核心進行計算。
+        """
         model = LinearRegression()
         model.set_params(**params)
         model.fit(X_train, y_train)
@@ -40,6 +51,20 @@ class model_l():
     def Elastic_net(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import ElasticNet
         params ={'alpha': 0.1, 'copy_X': True, 'fit_intercept': True, 'l1_ratio': 0.9}
+        """
+        alpha=0.1:
+
+        正則化強度；較高的 alpha 值會強化正則化，減少模型的過度擬合。
+        copy_X=True:
+
+        指定是否在訓練前複製 X；避免原始數據被修改。
+        fit_intercept=True:
+
+        指定是否計算截距項；如果設置為 False，模型不會計算截距。
+        l1_ratio=0.9:
+
+        ElasticNet 中 L1 和 L2 正則化的混合比例；l1_ratio=0.9 表示 90% 的 L1 正則化和 10% 的 L2 正則化。
+        """
         model = ElasticNet()
         model.set_params(**params)
         model.fit(X_train, y_train)
@@ -51,6 +76,23 @@ class model_l():
     def RidgeRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Ridge
         param =  {'alpha': 10.0, 'copy_X': True, 'fit_intercept': True, 'max_iter': 100, 'tol': 0.001}
+        """
+        alpha=10.0:
+
+        正則化強度；較高的 alpha 值會強化正則化，減少模型的過度擬合。
+        copy_X=True:
+
+        指定是否在訓練前複製 X；避免原始數據被修改。
+        fit_intercept=True:
+
+        指定是否計算截距項；如果設置為 False，模型不會計算截距。
+        max_iter=100:
+
+        算法的最大迭代次數；如果在這個次數內未能收斂，訓練將停止。
+        tol=0.001:
+
+        優化的容忍度；當模型參數變化小於這個值時，優化過程將停止。
+        """
         # 建立Ridge模型並訓練
         ridge_model = Ridge()
         ridge_model.set_params(**param)
@@ -65,6 +107,18 @@ class model_l():
     def LassoRegressor(self,X_train, X_test, y_train, y_test):
         from sklearn.linear_model import Lasso
         param = {'alpha': 0.1, 'copy_X': True, 'fit_intercept': True, 'max_iter': 100, 'tol': 0.001}
+        """
+        alpha
+        正則化強度；較高的 alpha 值會強化正則化，減少模型的過度擬合。
+        copy_X
+        指定是否在訓練前複製 X；避免原始數據被修改。
+        fit_intercept
+        指定是否計算截距項；如果設置為 False，模型不會計算截距。
+        max_iter
+        算法的最大迭代次數；如果在這個次數內未能收斂，訓練將停止。
+        tol=
+        優化的容忍度；當模型參數變化小於這個值時，優化過程將停止。
+        """
         # 建立LASSO模型並訓練
         lasso_model = Lasso()
         lasso_model.set_params(**param)
@@ -91,6 +145,17 @@ class model_l():
                     subsample = 0.6,
                     random_state=42
                 )
+        """
+        參數說明:
+        colsample_bytree -> 決定每棵樹隨機採樣的特徵比例
+        gamma -> 葉節點劃分的最小損失減少值 (0指沒有限制)
+        learning_rate -> 縮減每一步增量的權重
+        max_depth -> 樹的最大深度
+        min_child_weight -> 決定最小的葉子節點樣本權重和
+        n_estimators -> 樹的數量
+        subsample -> 隨機採樣訓練數據的比例
+        random_state -> 設置隨機數生成器的種子
+        """
         model.fit(X_train, y_train)
         y_train_pred = model.predict(X_train)
         y_pred = model.predict(X_test)
@@ -107,6 +172,13 @@ class model_l():
             n_estimators=100,
             random_state=42
         )
+        """
+        參數說明:
+        learning_rate -> 弱學習器(決策樹)的權重縮減係數
+        loss -> 指定損失函數的類型
+        n_estimators -> 決定學習器的數量
+        random_state -> 隨機數生成器的種子，確保每次拿到同樣結果
+        """
         # 訓練模型
         model.fit(X_train, y_train)
         # 評估模型
@@ -115,9 +187,6 @@ class model_l():
 
         self.__output_model_score("AdaboostRegressor",y_test,y_pred)
         self.__draw("AdaBoostRegressor",y_train,y_train_pred,y_test,y_pred)
-
-    def train(self):
-        pass
 
     def get_Training_columns():
         """
